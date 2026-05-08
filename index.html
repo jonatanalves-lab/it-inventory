@@ -169,16 +169,16 @@ a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
 
 <!-- MODALS -->
 
-<!-- New Employee -->
-<div class="mo" id="mE"><div class="ml"><div class="mhd"><div class="mtt">Add Employee</div><button class="mx" onclick="cm('mE')">✕</button></div>
-<div class="mbd">
+<!-- New/Edit Employee -->
+<div class="mo" id="mE"><div class="ml"><div class="mhd"><div class="mtt" id="mET">Add Employee</div><button class="mx" onclick="cm('mE')">✕</button></div>
+<div class="mbd"><input type="hidden" id="er">
   <div class="fg"><label>Full Name *</label><input id="en" placeholder="John Smith"></div>
   <div class="fr"><div class="fg"><label>Job Title *</label><input id="et" placeholder="Software Engineer"></div>
   <div class="fg"><label>Office Location *</label><input id="eo" placeholder="Lisbon, Portugal"></div></div>
   <div class="fg"><label>Email</label><input id="ee" placeholder="name@company.com"></div>
   <div class="ei" id="eE"></div>
 </div>
-<div class="mft"><button class="b bh" onclick="cm('mE')">Cancel</button><button class="b bp" onclick="subEmp()">Create →</button></div></div></div>
+<div class="mft"><button class="b bh" onclick="cm('mE')">Cancel</button><button class="b bp" id="eBt" onclick="subEmp()">Create →</button></div></div></div>
 
 <!-- Add/Edit Asset -->
 <div class="mo" id="mA"><div class="ml"><div class="mhd"><div class="mtt" id="mAT">Add Asset</div><button class="mx" onclick="cm('mA')">✕</button></div>
@@ -438,16 +438,19 @@ function renderDashboardPage(){
     t1.innerHTML=D.employees.map(x=>{
       const folderCell=pendingFolders.has(x.name)
         ?`<span class="bd bdy" style="display:inline-flex;align-items:center;gap:5px"><div class="sp" style="width:9px;height:9px;border-width:2px"></div>Creating…</span>`
-        :x.folderId
-          ?`<button class="b bh bs" onclick="viewForms('${e(x.name)}','${e(x.folderId)}')">📄 View</button>`
-          :'—';
+        :pendingFormEmp.has(x.name)
+          ?`<span class="bd bdy" style="display:inline-flex;align-items:center;gap:5px"><div class="sp" style="width:9px;height:9px;border-width:2px"></div>Creating form…</span>`
+          :x.folderId
+            ?`<button class="b bh bs" onclick="viewForms('${e(x.name)}','${e(x.folderId)}')">📄 View</button>`
+            :'—';
       return `<tr>
       <td><b>${e(x.name)}</b>${x.email?'<br><span style="font-size:9px;color:var(--t2)">'+e(x.email)+'</span>':''}</td>
       <td style="color:var(--t2)">${e(x.title||'—')}</td><td style="color:var(--t2)">${e(x.office||'—')}</td>
       <td><span class="bd ${x.assetCount?'bdb':'bdx'}">${x.assetCount}</span></td>
       <td>${folderCell}</td>
       <td><div style="display:flex;gap:4px"><button class="b bg bs" onclick="openAssign('${e(x.name)}')">+ Assign</button>
-      ${x.assetCount?`<button class="b br bs" onclick="openReturn('${e(x.name)}')">↩ Return</button>`:''}</div></td></tr>`;
+      ${x.assetCount?`<button class="b br bs" onclick="openReturn('${e(x.name)}')">↩</button>`:''}
+      <button class="b bh bs" onclick="openEditEmp(${x.row},'${e(x.name)}','${e(x.title||'')}','${e(x.office||'')}','${e(x.email||'')}')">✏️</button></div></td></tr>`;
     }).join('');
   }
   renderMov('T2',D.movements.slice(0,12),false);
@@ -466,7 +469,8 @@ function renderEmployeesPage(){
     <td><span class="bd ${x.assetCount?'bdb':'bdx'}">${x.assetCount}</span></td>
     <td>${folderCell}</td>
     <td><div style="display:flex;gap:4px"><button class="b bg bs" onclick="openAssign('${e(x.name)}')">+Assign</button>
-    ${x.assetCount?`<button class="b br bs" onclick="openReturn('${e(x.name)}')">↩</button>`:''}</div></td></tr>`;
+    ${x.assetCount?`<button class="b br bs" onclick="openReturn('${e(x.name)}')">↩</button>`:''}
+    <button class="b bh bs" onclick="openEditEmp(${x.row},'${e(x.name)}','${e(x.title||'')}','${e(x.office||'')}','${e(x.email||'')}')">✏️</button></div></td></tr>`;
   }).join('');
 }
 
@@ -527,25 +531,41 @@ function renderMov(id,movs,full){
 /* ══════════════════════════════════════════════════════
    NEW EMPLOYEE
    ══════════════════════════════════════════════════════ */
-function openNewEmp(){['en','et','eo','ee'].forEach(x=>$(x).value='');he('eE');om('mE')}
+function openNewEmp(){$('er').value='';['en','et','eo','ee'].forEach(x=>$(x).value='');he('eE');$('mET').textContent='Add Employee';$('eBt').textContent='Create →';om('mE')}
+function openEditEmp(row,name,title,office,email){$('er').value=row;$('en').value=name;$('et').value=title||'';$('eo').value=office||'';$('ee').value=email||'';he('eE');$('mET').textContent='Edit Employee';$('eBt').textContent='Save →';om('mE')}
 function subEmp(){
   const n=$('en').value.trim(),t=$('et').value.trim(),o=$('eo').value.trim();
   if(!n||!t||!o){se('eE','Name, Title and Location are required.');return}
   const email=$('ee').value.trim();
-  ld('Creating employee…');
-  run('createEmployee',{name:n,jobTitle:t,officeLocation:o,email},r=>{
-    if(r.ok){
-      hd();cm('mE');
-      D.employees.push({row:D.employees.length?Math.max(...D.employees.map(x=>x.row))+1:2,name:n,title:t,office:o,email,folderUrl:'',folderId:'',created:today(),assetCount:0});
-      D.stats.empCount++;
-      toast('Employee "'+n+'" created!','ok');
-      render();saveCache(D);
-      bgCreateFolder(n);
-    } else{hd();se('eE',r.err||'Error')}
-  });
+  const row=$('er').value;
+  const isEdit=!!row;
+  ld(isEdit?'Saving…':'Creating employee…');
+  if(isEdit){
+    run('editEmployee',{row:parseInt(row),name:n,jobTitle:t,officeLocation:o,email},r=>{
+      if(r.ok){
+        hd();cm('mE');
+        const emp=D.employees.find(x=>x.row==row);
+        if(emp){emp.name=n;emp.title=t;emp.office=o;emp.email=email;}
+        toast('Employee updated!','ok');
+        render();saveCache(D);
+      } else{hd();se('eE',r.err||'Error')}
+    });
+  } else {
+    run('createEmployee',{name:n,jobTitle:t,officeLocation:o,email},r=>{
+      if(r.ok){
+        hd();cm('mE');
+        D.employees.push({row:D.employees.length?Math.max(...D.employees.map(x=>x.row))+1:2,name:n,title:t,office:o,email,folderUrl:'',folderId:'',created:today(),assetCount:0});
+        D.stats.empCount++;
+        toast('Employee "'+n+'" created!','ok');
+        render();saveCache(D);
+        bgCreateFolder(n);
+      } else{hd();se('eE',r.err||'Error')}
+    });
+  }
 }
 
 let pendingFolders=new Set();
+let pendingFormEmp=new Set();
 function bgCreateFolder(name){
   pendingFolders.add(name);
   showBgBanner();render();
@@ -731,6 +751,7 @@ function subAssign(){
     const empObj=D.employees.find(x=>x.name===emp);if(empObj)empObj.assetCount=(empObj.assetCount||0)+rows.length;
     D.stats.assigned+=rows.length;D.stats.available-=rows.length;
     (r.assetInfos||[]).forEach(a=>{D.movements.unshift({'Form No':r.formNo,'Date':r.date,'Action Type':'ASSIGN','Employee Name':emp,'Internal ID':a.id,'Asset Model':a.model,'Category':a.cat,'Serial Number':a.serial,'Performed By':assignBy,'Notes':notes})});
+    pendingFormEmp.add(emp);setTimeout(()=>{pendingFormEmp.delete(emp);render();},90000);
     render();saveCache(D);
     bgFinish('assign-done',true,`Assigned! Form #${r.formNo} being generated in background.`);
   });
@@ -794,6 +815,7 @@ function subRet(){
     const empObj=D.employees.find(x=>x.name===emp);if(empObj)empObj.assetCount=Math.max(0,(empObj.assetCount||0)-rows.length);
     D.stats.assigned-=rows.length;D.stats.available+=rows.length;
     (r.assetInfos||[]).forEach(a=>{D.movements.unshift({'Form No':r.formNo,'Date':r.date,'Action Type':'RETURN','Employee Name':emp,'Internal ID':a.id,'Asset Model':a.model,'Category':a.cat,'Serial Number':a.serial,'Performed By':retBy,'Notes':notes})});
+    pendingFormEmp.add(emp);setTimeout(()=>{pendingFormEmp.delete(emp);render();},90000);
     render();saveCache(D);
     bgFinish('return-done',true,`Returned! Form #${r.formNo} being generated in background.`);
   });
