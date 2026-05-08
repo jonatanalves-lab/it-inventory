@@ -535,7 +535,7 @@ function subEmp(){
   ld('Creating employee…');
   run('createEmployee',{name:n,jobTitle:t,officeLocation:o,email},r=>{
     if(r.ok){
-      cm('mE');
+      hd();cm('mE');
       D.employees.push({row:D.employees.length?Math.max(...D.employees.map(x=>x.row))+1:2,name:n,title:t,office:o,email,folderUrl:'',folderId:'',created:today(),assetCount:0});
       D.stats.empCount++;
       toast('Employee "'+n+'" created!','ok');
@@ -630,7 +630,7 @@ function subA(){
   ld(isE?'Saving…':'Adding…');
   run(isE?'editAsset':'addAsset', isE?{...d,row:parseInt(row)}:d, r=>{
     if(r.ok){
-      cm('mA');
+      hd();cm('mA');
       if(isE){
         const idx=D.assets.findIndex(a=>a.row==row);
         if(idx>=0)Object.assign(D.assets[idx],{cat:d.cat,model:d.model,brand:d.brand,serial:d.serial,status:d.status,loc:d.loc,pdate:d.pdate,warr:d.warr,obs:d.obs});
@@ -863,4 +863,4 @@ function doSrch(){
 document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',ev=>{if(ev.target===m)m.classList.remove('on')}));
 </script>
 </body>
-</html> 
+</html>
