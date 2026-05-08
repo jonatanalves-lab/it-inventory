@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Inventory</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0d14;--s1:#13131f;--s2:#1a1a2e;--s3:#222238;--bd:#2a2a45;--acc:#6c63ff;--g:#43e97b;--r:#ff6584;--y:#f9ca24;--tx:#e8e8f0;--t2:#9090b0;--fn:'Syne',sans-serif;--mn:'DM Mono',monospace;--rd:12px;--sh:0 4px 32px rgba(0,0,0,.5)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh}
+#LS{display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse at 30% 40%,rgba(108,99,255,.15),transparent 60%),radial-gradient(ellipse at 70% 60%,rgba(255,101,132,.1),transparent 60%),var(--bg)}
+.lc{width:350px;background:var(--s1);border:1px solid var(--bd);border-radius:20px;padding:44px 36px;box-shadow:var(--sh)}
+.ll{text-align:center;margin-bottom:28px}
+.ll .ic{width:50px;height:50px;background:linear-gradient(135deg,var(--acc),var(--r));border-radius:14px;display:inline-flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:10px}
+.ll h1{font-size:20px;font-weight:800}.ll p{font-size:11px;color:var(--t2);font-family:var(--mn);margin-top:3px}
+.fg{margin-bottom:16px}.fg label{display:block;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--t2);margin-bottom:5px}
+input,select,textarea{width:100%;background:var(--s2);border:1px solid var(--bd);color:var(--tx);font-family:var(--fn);font-size:13px;padding:10px 13px;border-radius:8px;outline:none;transition:border .2s}
+input:focus,select:focus{border-color:var(--acc)}select option{background:var(--s2)}textarea{resize:vertical}input[readonly]{background:var(--s3)}
+.b{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-family:var(--fn);font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;text-decoration:none}
+.bp{background:linear-gradient(135deg,var(--acc),#8b84ff);color:#fff}.bp:hover{box-shadow:0 4px 16px rgba(108,99,255,.4)}
+.bg{background:rgba(67,233,123,.12);color:var(--g);border:1px solid rgba(67,233,123,.25)}.bg:hover{background:rgba(67,233,123,.2)}
+.br{background:rgba(255,101,132,.12);color:var(--r);border:1px solid rgba(255,101,132,.25)}.br:hover{background:rgba(255,101,132,.2)}
+.bh{background:transparent;color:var(--t2);border:1px solid var(--bd)}.bh:hover{background:var(--s2);color:var(--tx)}
+.bw{background:rgba(249,202,36,.12);color:var(--y);border:1px solid rgba(249,202,36,.25)}
+.bs{padding:5px 10px;font-size:10px;border-radius:6px}
+.bfull{width:100%;justify-content:center;padding:12px;font-size:14px}
+.err{background:rgba(255,101,132,.1);border:1px solid rgba(255,101,132,.3);color:var(--r);padding:8px 12px;border-radius:7px;font-size:11px;margin-top:8px;display:none}
+#A{display:none;min-height:100vh}
+.sb{position:fixed;left:0;top:0;bottom:0;width:200px;background:var(--s1);border-right:1px solid var(--bd);display:flex;flex-direction:column;padding:16px 0;z-index:100}
+.slg{padding:0 16px 16px;border-bottom:1px solid var(--bd);margin-bottom:10px}
+.slg .si{width:30px;height:30px;background:linear-gradient(135deg,var(--acc),var(--r));border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;margin-bottom:6px}
+.slg span{display:block;font-size:13px;font-weight:800}.slg small{font-size:9px;color:var(--t2);font-family:var(--mn)}
+.ni{display:flex;align-items:center;gap:8px;padding:9px 16px;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;transition:all .12s;border-left:3px solid transparent}
+.ni:hover{color:var(--tx);background:rgba(255,255,255,.03)}.ni.ac{color:var(--acc);border-left-color:var(--acc);background:rgba(108,99,255,.08)}
+.sbt{margin-top:auto;padding:12px 16px;border-top:1px solid var(--bd)}
+.mn{margin-left:200px;padding:24px;min-height:100vh}
+.tb{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.pt{font-size:24px;font-weight:800;letter-spacing:-.8px}.pt span{color:var(--acc)}
+.ta{display:flex;gap:7px;align-items:center}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.sc{background:var(--s1);border:1px solid var(--bd);border-radius:var(--rd);padding:20px;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;right:0;width:70px;height:70px;border-radius:50%;filter:blur(28px);opacity:.2}
+.c1::before{background:var(--acc)}.c2::before{background:var(--g)}.c3::before{background:var(--r)}.c4::before{background:var(--y)}
+.sv{font-size:30px;font-weight:800;letter-spacing:-2px;line-height:1;margin-bottom:3px}.sl{font-size:10px;color:var(--t2);font-family:var(--mn);text-transform:uppercase;letter-spacing:.5px}
+.cd{background:var(--s1);border:1px solid var(--bd);border-radius:var(--rd);overflow:hidden;margin-bottom:18px}
+.ch{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--bd)}
+.ct{font-size:13px;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead th{padding:9px 16px;text-align:left;font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--t2);background:var(--s2);font-family:var(--mn)}
+tbody tr{border-top:1px solid var(--bd);transition:background .1s}tbody tr:hover{background:rgba(255,255,255,.02)}
+td{padding:10px 16px;vertical-align:middle}
+.bd{display:inline-flex;align-items:center;padding:2px 8px;border-radius:16px;font-size:9px;font-weight:600;font-family:var(--mn)}
+.bdg{background:rgba(67,233,123,.12);color:var(--g)}.bdb{background:rgba(108,99,255,.12);color:#a09eff}
+.bdr{background:rgba(255,101,132,.12);color:var(--r)}.bdy{background:rgba(249,202,36,.12);color:var(--y)}.bdx{background:rgba(144,144,176,.1);color:var(--t2)}
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(3px);z-index:1000;align-items:center;justify-content:center}.mo.on{display:flex}
+.ml{background:var(--s1);border:1px solid var(--bd);border-radius:16px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:var(--sh)}
+.ml.wd{width:640px}
+.mhd{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--bd)}
+.mtt{font-size:16px;font-weight:800}.mx{background:none;border:none;color:var(--t2);font-size:18px;cursor:pointer;padding:4px;border-radius:5px}.mx:hover{background:var(--s2);color:var(--tx)}
+.mbd{padding:20px 24px}.mft{padding:12px 24px 20px;display:flex;gap:7px;justify-content:flex-end;border-top:1px solid var(--bd)}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ap{max-height:240px;overflow-y:auto;border:1px solid var(--bd);border-radius:8px;background:var(--s2)}
+.ai{display:flex;align-items:center;gap:9px;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--bd);transition:background .1s}
+.ai:last-child{border-bottom:none}.ai:hover{background:rgba(108,99,255,.07)}.ai.sl{background:rgba(108,99,255,.12)}
+.ai input[type=checkbox]{width:14px;height:14px;accent-color:var(--acc)}
+.lo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.lo.on{display:flex}
+.sp{width:28px;height:28px;border:3px solid var(--bd);border-top-color:var(--acc);border-radius:50%;animation:sn .6s linear infinite}
+@keyframes sn{to{transform:rotate(360deg)}}
+.lt{font-size:12px;color:var(--t2);font-family:var(--mn)}
+.tc{position:fixed;bottom:16px;right:16px;z-index:9998;display:flex;flex-direction:column;gap:6px}
+.tt{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px 14px;font-size:11px;box-shadow:var(--sh);display:flex;align-items:center;gap:8px;animation:si .25s;max-width:280px}
+@keyframes si{from{opacity:0;transform:translateX(12px)}}
+.tt.ok{border-left:3px solid var(--g)}.tt.er{border-left:3px solid var(--r)}.tt.in{border-left:3px solid var(--acc)}
+.pg{display:none}.pg.ac{display:block}
+.em{text-align:center;padding:36px 16px;color:var(--t2)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--s1)}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
+.rb{background:rgba(67,233,123,.08);border:1px solid rgba(67,233,123,.25);border-radius:9px;padding:12px 16px;margin-top:12px;display:none;font-size:12px}.rb.on{display:flex;align-items:flex-start;gap:9px}
+.ei{color:var(--r);font-size:11px;margin-top:6px;display:none}.ei.on{display:block}
+.sr{position:relative;flex:1;max-width:280px}.sr input{padding-left:32px}.si2{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t2);font-size:12px}
+</style>
+</head>
+<body>
+<div class="lo" id="LO"><div class="sp"></div><div class="lt" id="LT">Loading…</div></div>
+<div class="tc" id="TC"></div>
+
+<!-- LOGIN -->
+<div id="LS">
+  <div class="lc">
+    <div class="ll"><div class="ic">🖥️</div><h1>IT Inventory</h1><p>Management System</p></div>
+    <div class="fg"><label>Password</label><input type="password" id="LP" placeholder="Enter password…" onkeydown="if(event.key==='Enter')login()"></div>
+    <button class="b bp bfull" onclick="login()">Sign In →</button>
+    <div class="err" id="LE">Incorrect password.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="A">
+  <nav class="sb">
+    <div class="slg"><div class="si">🖥️</div><span>IT Inventory</span><small>Management</small></div>
+    <div class="ni ac" onclick="nav('dash')" data-p="dash"><span>📊</span>Dashboard</div>
+    <div class="ni" onclick="nav('emp')" data-p="emp"><span>👤</span>Employees</div>
+    <div class="ni" onclick="nav('ast')" data-p="ast"><span>💻</span>Assets</div>
+    <div class="ni" onclick="nav('mov')" data-p="mov"><span>📋</span>Movements</div>
+    <div class="ni" onclick="nav('srch')" data-p="srch"><span>🔍</span>Search</div>
+    <div class="sbt"><div class="ni" onclick="logout()" style="color:var(--r)"><span>🚪</span>Logout</div></div>
+  </nav>
+
+  <main class="mn">
+
+    <!-- DASHBOARD -->
+    <div class="pg ac" id="pg-dash">
+      <div class="tb"><h1 class="pt">IT <span>Dashboard</span></h1>
+        <div class="ta"><button class="b bh" onclick="refresh()">↻ Refresh</button><button class="b bg" onclick="openAssign()">+ Assign</button></div></div>
+      <div class="sg">
+        <div class="sc c1"><div class="sv" id="s1">—</div><div class="sl">Total Assets</div></div>
+        <div class="sc c2"><div class="sv" id="s2">—</div><div class="sl">Available</div></div>
+        <div class="sc c3"><div class="sv" id="s3">—</div><div class="sl">Assigned</div></div>
+        <div class="sc c4"><div class="sv" id="s4">—</div><div class="sl">Employees</div></div>
+      </div>
+      <div class="cd">
+        <div class="ch"><div class="ct">👤 Employee Overview</div><button class="b bh bs" onclick="openNewEmp()">+ Add Employee</button></div>
+        <table><thead><tr><th>Employee</th><th>Title</th><th>Location</th><th>Assets</th><th>Forms</th><th>Actions</th></tr></thead>
+        <tbody id="T1"></tbody></table>
+      </div>
+      <div class="cd">
+        <div class="ch"><div class="ct">📋 Recent Movements</div></div>
+        <table><thead><tr><th>Form #</th><th>Date</th><th>Action</th><th>Employee</th><th>Asset</th><th>Model</th></tr></thead>
+        <tbody id="T2"></tbody></table>
+      </div>
+    </div>
+
+    <!-- EMPLOYEES -->
+    <div class="pg" id="pg-emp">
+      <div class="tb"><h1 class="pt">👤 <span>Employees</span></h1><button class="b bg" onclick="openNewEmp()">+ Add Employee</button></div>
+      <div class="cd"><table><thead><tr><th>Name</th><th>Title</th><th>Location</th><th>Email</th><th>Assets</th><th>Folder</th><th>Actions</th></tr></thead>
+      <tbody id="T3"></tbody></table></div>
+    </div>
+
+    <!-- ASSETS -->
+    <div class="pg" id="pg-ast">
+      <div class="tb"><h1 class="pt">💻 <span>Assets</span></h1>
+        <div class="ta"><div class="sr"><span class="si2">🔍</span><input type="text" placeholder="Filter…" id="AF" oninput="filt()"></div>
+        <button class="b bg" onclick="openAddA()">+ Add Asset</button></div></div>
+      <div class="cd"><table><thead><tr><th>ID</th><th>Category</th><th>Model</th><th>Brand</th><th>Serial</th><th>Status</th><th>User</th><th>Location</th><th>Actions</th></tr></thead>
+      <tbody id="T4"></tbody></table></div>
+    </div>
+
+    <!-- MOVEMENTS -->
+    <div class="pg" id="pg-mov">
+      <div class="tb"><h1 class="pt">📋 <span>Movements</span></h1></div>
+      <div class="cd"><table><thead><tr><th>Form #</th><th>Date</th><th>Action</th><th>Employee</th><th>ID</th><th>Model</th><th>Category</th><th>Serial</th><th>By</th></tr></thead>
+      <tbody id="T5"></tbody></table></div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="pg" id="pg-srch">
+      <div class="tb"><h1 class="pt">🔍 <span>Search</span></h1></div>
+      <div class="cd"><div class="mbd" style="display:flex;gap:8px">
+        <div class="sr" style="max-width:100%;flex:1"><span class="si2">🔍</span><input type="text" placeholder="Search by form #, employee, serial…" id="SQ" onkeydown="if(event.key==='Enter')doSrch()"></div>
+        <button class="b bp" onclick="doSrch()">Search</button>
+      </div></div>
+      <div id="SR"></div>
+    </div>
+  </main>
+</div>
+
+<!-- MODALS -->
+
+<!-- New Employee -->
+<div class="mo" id="mE"><div class="ml"><div class="mhd"><div class="mtt">Add Employee</div><button class="mx" onclick="cm('mE')">✕</button></div>
+<div class="mbd">
+  <div class="fg"><label>Full Name *</label><input id="en" placeholder="John Smith"></div>
+  <div class="fr"><div class="fg"><label>Job Title *</label><input id="et" placeholder="Software Engineer"></div>
+  <div class="fg"><label>Office Location *</label><input id="eo" placeholder="Lisbon, Portugal"></div></div>
+  <div class="fg"><label>Email</label><input id="ee" placeholder="name@company.com"></div>
+  <div class="ei" id="eE"></div>
+</div>
+<div class="mft"><button class="b bh" onclick="cm('mE')">Cancel</button><button class="b bp" onclick="subEmp()">Create →</button></div></div></div>
+
+<!-- Add/Edit Asset -->
+<div class="mo" id="mA"><div class="ml"><div class="mhd"><div class="mtt" id="mAT">Add Asset</div><button class="mx" onclick="cm('mA')">✕</button></div>
+<div class="mbd"><input type="hidden" id="ar">
+  <div class="fr">
+    <div class="fg"><label>Category *</label><select id="ac"><option value="">Select…</option>
+      <option>Laptop</option><option>Desktop</option><option>Smartphone</option><option>Monitor</option>
+      <option>Headset</option><option>Keyboard + Mouse</option><option>Mouse</option><option>Webcam</option>
+      <option>Earbuds</option><option>Microphone</option><option>Digital Camera</option>
+      <option>Light</option><option>Cable</option><option>Mousepad</option><option>Other</option></select></div>
+    <div class="fg"><label>Brand</label><input id="ab" placeholder="Lenovo"></div></div>
+  <div class="fg"><label>Model *</label><input id="am" placeholder="ThinkPad E14 Gen 7"></div>
+  <div class="fr"><div class="fg"><label>Serial Number</label><input id="as" placeholder="S/N"></div>
+    <div class="fg"><label>Status</label><select id="ax"><option>Available</option><option>In use</option><option>In maintenance</option><option>Ordered</option><option>Unknown</option></select></div></div>
+  <div class="fr"><div class="fg"><label>Purchase Date</label><input type="date" id="ap"></div>
+    <div class="fg"><label>Warranty Until</label><input type="date" id="aw"></div></div>
+  <div class="fr"><div class="fg"><label>Location</label><input id="al" value="Portugal"></div>
+    <div class="fg"><label>Notes</label><input id="ao" placeholder="New, Intuned"></div></div>
+  <div class="ei" id="aE"></div>
+</div>
+<div class="mft"><button class="b bh" onclick="cm('mA')">Cancel</button><button class="b bp" id="aB" onclick="subA()">Add →</button></div></div></div>
+
+<!-- Assign -->
+<div class="mo" id="mG"><div class="ml wd"><div class="mhd"><div class="mtt">Assign Equipment</div><button class="mx" onclick="cm('mG')">✕</button></div>
+<div class="mbd">
+  <div class="fg"><label>Employee *</label><select id="ge"><option value="">Select…</option></select></div>
+  <div class="fr"><div class="fg"><label>Date Issued</label><input type="date" id="gd"></div>
+    <div class="fg"><label>Performed By</label><input id="gb" placeholder="IT Admin"></div></div>
+  <div class="fg">
+    <label>Equipment * <span style="font-size:9px;color:var(--t2);font-weight:400">— check items to assign</span></label>
+    <div style="display:flex;gap:6px;margin-bottom:8px">
+      <div class="sr" style="max-width:none;flex:1"><span class="si2">🔍</span>
+        <input type="text" id="gFs" placeholder="Search by model, serial, ID, brand…" oninput="renderAvailAssets()"></div>
+      <select id="gFc" onchange="renderAvailAssets()" style="max-width:160px;flex-shrink:0">
+        <option value="">All categories</option>
+      </select>
+    </div>
+    <div class="ap" id="gP"></div>
+    <div style="font-size:10px;color:var(--t2);margin-top:6px;font-family:var(--mn)">
+      <span id="gCnt">0 selected</span>
+    </div>
+  </div>
+  <div class="fg"><label>Notes</label><textarea id="gn" rows="2" placeholder="Optional…"></textarea></div>
+  <div class="rb" id="gR"></div><div class="ei" id="gE"></div>
+</div>
+<div class="mft"><button class="b bh" onclick="cm('mG')">Cancel</button><button class="b bp" onclick="subAssign()">Assign & Generate Form →</button></div></div></div>
+
+<!-- Return -->
+<div class="mo" id="mR"><div class="ml wd"><div class="mhd"><div class="mtt">Return Equipment</div><button class="mx" onclick="cm('mR')">✕</button></div>
+<div class="mbd">
+  <div class="fg"><label>Employee</label><input id="re" readonly></div>
+  <div class="fg"><label>Equipment to Return *</label>
+    <div class="sr" style="max-width:none;margin-bottom:8px"><span class="si2">🔍</span>
+      <input type="text" id="rFs" placeholder="Search assigned equipment…" oninput="renderRetAssets()"></div>
+    <div class="ap" id="rP"></div>
+    <div style="font-size:10px;color:var(--t2);margin-top:6px;font-family:var(--mn)">
+      <span id="rCnt">0 selected</span>
+    </div>
+  </div>
+  <div class="fr"><div class="fg"><label>Date Returned</label><input type="date" id="rd"></div>
+    <div class="fg"><label>Performed By</label><input id="rb" placeholder="IT Admin"></div></div>
+  <div class="fg"><label>Return Reason</label><input id="rr" placeholder="Departure, upgrade…"></div>
+  <div class="fg"><label>Notes</label><textarea id="rn" rows="2" placeholder="Optional…"></textarea></div>
+  <div class="rb" id="rR"></div><div class="ei" id="rE"></div>
+</div>
+<div class="mft"><button class="b bh" onclick="cm('mR')">Cancel</button><button class="b br" onclick="subRet()">Return & Generate Form →</button></div></div></div>
+
+<!-- Forms -->
+<div class="mo" id="mF"><div class="ml"><div class="mhd"><div class="mtt">IT Forms — <span id="fN"></span></div><button class="mx" onclick="cm('mF')">✕</button></div>
+<div class="mbd" id="fL"></div></div></div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   CONFIG — cole aqui o URL do teu GAS deployment
+   ══════════════════════════════════════════════════════ */
+const GAS_URL = 'COLE_AQUI_O_URL_DO_GAS';
+
+/* ══════════════════════════════════════════════════════
+   API — fetch direto ao GAS (sem google.script.run)
+   ══════════════════════════════════════════════════════ */
+async function api(action, data) {
+  const enc = data
+    ? '&data=' + encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(data)))))
+    : '';
+  const res = await fetch(GAS_URL + '?action=' + action + enc);
+  if (!res.ok) throw new Error('Erro de rede: HTTP ' + res.status);
+  return res.json();
+}
+
+// Wrapper sync-compatible — mantém a interface usada pelas funções existentes
+function run(action, data, cb) {
+  api(action, data)
+    .then(result => cb(result))
+    .catch(err => { hd(); toast(err.message || String(err), 'er'); });
+}
+
+/* ══════════════════════════════════════════════════════
+   STATE
+   ══════════════════════════════════════════════════════ */
+let D = null;
+
+const $  = id => document.getElementById(id);
+const e  = s  => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const sv = v  => String(v==null?'':v);
+const today = () => new Date().toISOString().split('T')[0];
+
+function ld(t){$('LT').textContent=t||'Loading…';$('LO').classList.add('on')}
+function hd(){$('LO').classList.remove('on')}
+function om(id){$(id).classList.add('on')}
+function cm(id){$(id).classList.remove('on')}
+function se(id,m){const x=$(id);x.textContent=m;x.classList.add('on')}
+function he(id){$(id).classList.remove('on')}
+function toast(m,t){const c=$('TC'),d=document.createElement('div');d.className='tt '+(t||'in');d.innerHTML=`<span>${t==='ok'?'✅':t==='er'?'❌':'ℹ️'}</span><span>${e(m)}</span>`;c.appendChild(d);setTimeout(()=>d.remove(),3500)}
+
+/* ══════════════════════════════════════════════════════
+   AUTH
+   ══════════════════════════════════════════════════════ */
+function login() {
+  ld('Authenticating…');
+  const pw = $('LP').value;
+  const cached = loadCache();
+
+  // Dispara verificação + carregamento em paralelo
+  const verifyP = api('verify', {pw});
+  const loadP   = api('load');
+
+  verifyP.then(auth => {
+    if (!auth.ok) {
+      hd();
+      $('LE').style.display = 'block';
+      return;
+    }
+    // Password OK — mostra dados cached imediatamente se existirem
+    $('LE').style.display = 'none';
+    $('LS').style.display = 'none';
+    $('A').style.display  = 'block';
+    currentPage = 'dash';
+    if (cached) {
+      D = cached;
+      render();
+      hd();
+      showStaleBanner();
+    }
+    // Aguarda dados frescos em background
+    loadP.then(freshData => {
+      D = freshData;
+      saveCache(D);
+      render();
+      hd();
+      hideStaleBanner();
+    }).catch(() => {
+      hd();
+      hideStaleBanner();
+      if (!cached) toast('Erro ao carregar dados do servidor', 'er');
+      else toast('A usar dados em cache', 'in');
+    });
+  }).catch(err => {
+    hd();
+    toast('Erro de ligação: ' + (err.message || String(err)), 'er');
+  });
+}
+
+/* Cache helpers */
+const CACHE_KEY = 'it_inventory_cache_v1';
+function saveCache(d){try{const j=JSON.stringify({ts:Date.now(),data:d});if(j.length<4*1024*1024)localStorage.setItem(CACHE_KEY,j)}catch(e){}}
+function loadCache(){try{const r=localStorage.getItem(CACHE_KEY);if(!r)return null;const p=JSON.parse(r);if(Date.now()-p.ts>24*60*60*1000)return null;return p.data}catch(e){return null}}
+function clearCache(){try{localStorage.removeItem(CACHE_KEY)}catch(e){}}
+
+function showStaleBanner(){
+  let b=$('staleBanner');
+  if(!b){b=document.createElement('div');b.id='staleBanner';b.style.cssText='position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:9996;background:rgba(108,99,255,.12);border:1px solid var(--acc);color:var(--acc);padding:7px 14px;border-radius:20px;font-size:11px;display:flex;align-items:center;gap:8px;font-family:var(--mn)';document.body.appendChild(b)}
+  b.innerHTML='<div class="sp" style="width:10px;height:10px;border-width:2px;border-top-color:var(--acc)"></div> Updating data from server…';
+  b.style.display='flex';
+}
+function hideStaleBanner(){const b=$('staleBanner');if(b)b.remove()}
+
+function logout(){
+  clearCache();
+  $('A').style.display='none';
+  $('LS').style.display='flex';
+  $('LP').value='';
+  D=null;
+  hideStaleBanner();
+}
+
+function refresh(){
+  ld('Refreshing…');
+  run('load', null, data=>{
+    hd();
+    D=data;
+    saveCache(D);
+    render();
+    toast('Refreshed!','ok');
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   NAV
+   ══════════════════════════════════════════════════════ */
+let currentPage = 'dash';
+function nav(p){
+  document.querySelectorAll('.pg').forEach(x=>x.classList.remove('ac'));
+  document.querySelectorAll('.ni').forEach(x=>x.classList.remove('ac'));
+  $('pg-'+p).classList.add('ac');
+  document.querySelector(`[data-p="${p}"]`).classList.add('ac');
+  currentPage=p;
+  renderCurrentPage();
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER
+   ══════════════════════════════════════════════════════ */
+function render(){
+  if(!D)return;
+  $('s1').textContent=D.stats.total;
+  $('s2').textContent=D.stats.available;
+  $('s3').textContent=D.stats.assigned;
+  $('s4').textContent=D.stats.empCount;
+  renderCurrentPage();
+}
+
+function renderCurrentPage(){
+  if(!D)return;
+  if(currentPage==='dash') renderDashboardPage();
+  else if(currentPage==='emp')  renderEmployeesPage();
+  else if(currentPage==='ast')  renderAssetsPage();
+  else if(currentPage==='mov')  renderMovementsPage();
+}
+
+function renderDashboardPage(){
+  const t1=$('T1');
+  if(!D.employees.length){
+    t1.innerHTML='<tr><td colspan="6"><div class="em">No employees yet</div></td></tr>';
+  } else {
+    t1.innerHTML=D.employees.map(x=>{
+      const folderCell=pendingFolders.has(x.name)
+        ?`<span class="bd bdy" style="display:inline-flex;align-items:center;gap:5px"><div class="sp" style="width:9px;height:9px;border-width:2px"></div>Creating…</span>`
+        :x.folderId
+          ?`<button class="b bh bs" onclick="viewForms('${e(x.name)}','${e(x.folderId)}')">📄 View</button>`
+          :'—';
+      return `<tr>
+      <td><b>${e(x.name)}</b>${x.email?'<br><span style="font-size:9px;color:var(--t2)">'+e(x.email)+'</span>':''}</td>
+      <td style="color:var(--t2)">${e(x.title||'—')}</td><td style="color:var(--t2)">${e(x.office||'—')}</td>
+      <td><span class="bd ${x.assetCount?'bdb':'bdx'}">${x.assetCount}</span></td>
+      <td>${folderCell}</td>
+      <td><div style="display:flex;gap:4px"><button class="b bg bs" onclick="openAssign('${e(x.name)}')">+ Assign</button>
+      ${x.assetCount?`<button class="b br bs" onclick="openReturn('${e(x.name)}')">↩ Return</button>`:''}</div></td></tr>`;
+    }).join('');
+  }
+  renderMov('T2',D.movements.slice(0,12),false);
+}
+
+function renderEmployeesPage(){
+  $('T3').innerHTML=D.employees.map(x=>{
+    const folderCell=pendingFolders.has(x.name)
+      ?`<span class="bd bdy" style="display:inline-flex;align-items:center;gap:5px"><div class="sp" style="width:9px;height:9px;border-width:2px"></div>Creating…</span>`
+      :x.folderUrl
+        ?`<a href="${x.folderUrl}" target="_blank" class="b bh bs">📁 Open</a>`
+        :`<button class="b bh bs" onclick="bgCreateFolder('${e(x.name)}')">+ Create folder</button>`;
+    return `<tr>
+    <td><b>${e(x.name)}</b></td><td style="color:var(--t2)">${e(x.title||'—')}</td>
+    <td style="color:var(--t2)">${e(x.office||'—')}</td><td style="font-size:10px">${e(x.email||'—')}</td>
+    <td><span class="bd ${x.assetCount?'bdb':'bdx'}">${x.assetCount}</span></td>
+    <td>${folderCell}</td>
+    <td><div style="display:flex;gap:4px"><button class="b bg bs" onclick="openAssign('${e(x.name)}')">+Assign</button>
+    ${x.assetCount?`<button class="b br bs" onclick="openReturn('${e(x.name)}')">↩</button>`:''}</div></td></tr>`;
+  }).join('');
+}
+
+function renderAssetsPage(){renderAst(D.assets)}
+
+function renderMovementsPage(){
+  const visible=D.movements.slice(0,200);
+  renderMov('T5',visible,true);
+  const t5=$('T5');
+  if(D.movements.length>200&&t5){
+    const note=document.createElement('tr');
+    note.innerHTML=`<td colspan="9" style="text-align:center;color:var(--t2);padding:14px;font-size:10px">Showing 200 most recent of ${D.movements.length}. Use Search to find older.</td>`;
+    t5.appendChild(note);
+  }
+}
+
+function renderAst(list){
+  const t4=$('T4');
+  if(!list||!list.length){t4.innerHTML='<tr><td colspan="9"><div class="em">No assets</div></td></tr>';return}
+  const shown=list.slice(0,300);
+  let html=shown.map(a=>{
+    const sc=stc(a.status),uc=(a.user&&a.user!=='N/A'&&a.user!=='?')?'bdb':'bdx';
+    return `<tr>
+      <td><span style="font-family:var(--mn);font-size:9px;color:var(--acc)">${e(a.id||'—')}</span></td>
+      <td>${e(a.cat)}</td><td><b>${e(a.model)}</b></td><td style="color:var(--t2)">${e(a.brand)}</td>
+      <td style="font-family:var(--mn);font-size:9px">${e(a.serial||'—')}</td>
+      <td><span class="bd ${sc}">${e(a.status)}</span></td>
+      <td><span class="bd ${uc}">${e(a.user&&a.user!=='N/A'?a.user:'—')}</span></td>
+      <td style="font-size:10px;color:var(--t2)">${e(a.loc)}</td>
+      <td><div style="display:flex;gap:3px">
+        <button class="b bw bs" onclick='openEditA(${JSON.stringify(a).replace(/'/g,"&#39;")})'>✎</button>
+        <button class="b br bs" onclick="delA(${a.row},'${e(a.model)}')">✕</button></div></td></tr>`;
+  }).join('');
+  if(list.length>300)html+=`<tr><td colspan="9" style="text-align:center;color:var(--t2);padding:12px;font-size:10px">Showing 300 of ${list.length}. Use filter to narrow.</td></tr>`;
+  t4.innerHTML=html;
+}
+
+function stc(s){const l=(s||'').toLowerCase();return l==='available'?'bdg':l.includes('use')?'bdb':l.includes('maint')?'bdy':l==='ordered'?'bdr':'bdx'}
+function filt(){const q=$('AF').value.toLowerCase();if(!q){renderAst(D.assets);return}renderAst(D.assets.filter(a=>Object.values(a).some(v=>String(v).toLowerCase().includes(q))))}
+
+function renderMov(id,movs,full){
+  const tb=$(id);if(!movs||!movs.length){tb.innerHTML=`<tr><td colspan="${full?9:6}" style="text-align:center;padding:24px;color:var(--t2)">No movements yet</td></tr>`;return}
+  tb.innerHTML=movs.map(m=>{
+    const ac=sv(m['Action Type'])==='ASSIGN'?'bdg':'bdr';
+    let r=`<td><span style="font-family:var(--mn);font-size:10px;color:var(--acc)">#${e(sv(m['Form No']))}</span></td>
+      <td style="font-size:10px">${e(sv(m['Date']))}</td>
+      <td><span class="bd ${ac}">${e(sv(m['Action Type']))}</span></td>
+      <td>${e(sv(m['Employee Name']))}</td>
+      <td style="font-family:var(--mn);font-size:9px">${e(sv(m['Internal ID']))}</td>
+      <td style="color:var(--t2)">${e(sv(m['Asset Model']))}</td>`;
+    if(full)r+=`<td style="color:var(--t2)">${e(sv(m['Category']))}</td>
+      <td style="font-family:var(--mn);font-size:9px">${e(sv(m['Serial Number']))}</td>
+      <td>${e(sv(m['Performed By']))}</td>`;
+    return `<tr>${r}</tr>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════════════
+   NEW EMPLOYEE
+   ══════════════════════════════════════════════════════ */
+function openNewEmp(){['en','et','eo','ee'].forEach(x=>$(x).value='');he('eE');om('mE')}
+function subEmp(){
+  const n=$('en').value.trim(),t=$('et').value.trim(),o=$('eo').value.trim();
+  if(!n||!t||!o){se('eE','Name, Title and Location are required.');return}
+  const email=$('ee').value.trim();
+  ld('Creating employee…');
+  run('createEmployee',{name:n,jobTitle:t,officeLocation:o,email},r=>{
+    if(r.ok){
+      cm('mE');
+      D.employees.push({row:D.employees.length?Math.max(...D.employees.map(x=>x.row))+1:2,name:n,title:t,office:o,email,folderUrl:'',folderId:'',created:today(),assetCount:0});
+      D.stats.empCount++;
+      toast('Employee "'+n+'" created!','ok');
+      render();saveCache(D);
+      bgCreateFolder(n);
+    } else{hd();se('eE',r.err||'Error')}
+  });
+}
+
+let pendingFolders=new Set();
+function bgCreateFolder(name){
+  pendingFolders.add(name);
+  showBgBanner();render();
+  api('createFolder',{name})
+    .then(res=>{
+      pendingFolders.delete(name);
+      if(res&&res.ok){
+        if(D&&D.employees){const emp=D.employees.find(x=>x.name===name);if(emp){emp.folderUrl=res.folderUrl;emp.folderId=res.folderId}}
+        toast('📁 Folder ready for "'+name+'"','ok');
+      } else toast('Could not create folder for "'+name+'"','er');
+      hideBgBanner();render();
+    })
+    .catch(err=>{
+      pendingFolders.delete(name);
+      hideBgBanner();
+      toast('Failed to create folder: '+err.message,'er');
+      render();
+    });
+}
+
+function showBgBanner(){
+  let b=$('bgB');
+  if(!b){b=document.createElement('div');b.id='bgB';b.style.cssText='position:fixed;top:16px;right:16px;z-index:9997;background:var(--s2);border:1px solid var(--bd);border-left:3px solid var(--y);border-radius:10px;padding:10px 14px;font-size:11px;box-shadow:var(--sh);display:flex;align-items:center;gap:9px;max-width:300px';document.body.appendChild(b)}
+  const list=[...pendingFolders];
+  b.innerHTML=`<div class="sp" style="width:14px;height:14px;border-width:2px"></div><div><div style="font-weight:600;color:var(--y);margin-bottom:2px">Creating Drive folder${list.length>1?'s':''}…</div><div style="color:var(--t2);font-size:10px">Don't close — ${e(list.join(', '))}</div></div>`;
+  b.style.display='flex';
+}
+function hideBgBanner(){
+  if(pendingFolders.size===0){const b=$('bgB');if(b)b.style.display='none'}else showBgBanner();
+}
+
+/* ══════════════════════════════════════════════════════
+   BACKGROUND NOTIFICATION (Assign / Return)
+   ══════════════════════════════════════════════════════ */
+let bgState=null;
+function bgStart(id,opts){
+  bgState=Object.assign({id},opts);
+  let n=$('bgN');
+  if(!n){n=document.createElement('div');n.id='bgN';n.style.cssText='position:fixed;top:16px;right:16px;z-index:9997;background:var(--s2);border:1px solid var(--bd);border-left:3px solid var(--acc);border-radius:11px;padding:13px 16px;font-size:12px;box-shadow:var(--sh);display:flex;align-items:flex-start;gap:11px;max-width:340px;min-width:280px';document.body.appendChild(n)}
+  bgRender();n.style.display='flex';
+}
+function bgUpdate(opts){if(!bgState)return;Object.assign(bgState,opts);bgRender()}
+function bgRender(){
+  const n=$('bgN');if(!n||!bgState)return;
+  const pct=bgState.totalSteps?Math.min(95,Math.round(((bgState.step-1)/bgState.totalSteps)*100+(1/bgState.totalSteps*50))):0;
+  n.innerHTML='<div class="sp" style="width:14px;height:14px;border-width:2px;flex-shrink:0;margin-top:2px"></div>'
+    +'<div style="flex:1;min-width:0">'
+    +'<div style="font-weight:600;color:var(--tx);margin-bottom:3px">'+e(bgState.title)+'</div>'
+    +'<div style="color:var(--t2);font-size:10px;margin-bottom:6px">Step '+bgState.step+'/'+bgState.totalSteps+' — '+e(bgState.stepText)+'</div>'
+    +'<div style="background:var(--bd);height:3px;border-radius:2px;overflow:hidden">'
+    +'<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--acc),#8b84ff);transition:width .3s"></div>'
+    +'</div>'
+    +'<div style="color:var(--t2);font-size:9px;margin-top:5px">⚠ Keep this tab open</div>'
+    +'</div>';
+}
+function bgFinish(id,success,message,link){
+  bgState=null;
+  const n=$('bgN');if(!n)return;
+  const color=success===true?'var(--g)':success===false?'var(--r)':'var(--y)';
+  const icon=success===true?'✅':success===false?'❌':'⚠️';
+  const linkHtml=link?'<br><a href="'+link.url+'" target="_blank" style="font-size:11px">'+e(link.label)+'</a>':'';
+  n.style.borderLeftColor=color;
+  n.innerHTML='<div style="font-size:18px;flex-shrink:0">'+icon+'</div>'
+    +'<div style="flex:1">'
+    +'<div style="font-size:12px;color:var(--tx);margin-bottom:3px">'+e(message)+linkHtml+'</div>'
+    +'<button onclick="document.getElementById(\'bgN\').remove()" style="background:none;border:none;color:var(--t2);cursor:pointer;font-size:10px;padding:0;margin-top:4px;text-decoration:underline">Dismiss</button>'
+    +'</div>';
+  if(success===true)setTimeout(()=>{const x=$('bgN');if(x)x.remove()},15000);
+}
+
+/* ══════════════════════════════════════════════════════
+   ADD / EDIT ASSET
+   ══════════════════════════════════════════════════════ */
+function openAddA(){$('mAT').textContent='Add Asset';$('ar').value='';['ac','ab','am','as','ap','aw','ao'].forEach(x=>$(x).value='');$('ax').value='Available';$('al').value='Portugal';$('aB').textContent='Add →';he('aE');om('mA')}
+function openEditA(a){$('mAT').textContent='Edit Asset';$('ar').value=a.row;$('ac').value=a.cat||'';$('ab').value=a.brand||'';$('am').value=a.model||'';$('as').value=a.serial||'';$('ax').value=a.status||'Available';$('ap').value=a.pdate||'';$('aw').value=a.warr||'';$('al').value=a.loc||'Portugal';$('ao').value=a.obs||'';$('aB').textContent='Save →';he('aE');om('mA')}
+
+function subA(){
+  const cat=$('ac').value,model=$('am').value.trim();
+  if(!cat||!model){se('aE','Category and Model required.');return}
+  const d={cat,brand:$('ab').value.trim(),model,serial:$('as').value.trim(),status:$('ax').value,pdate:$('ap').value,warr:$('aw').value,loc:$('al').value.trim()||'Portugal',obs:$('ao').value.trim()};
+  const row=$('ar').value;const isE=!!row;
+  ld(isE?'Saving…':'Adding…');
+  run(isE?'editAsset':'addAsset', isE?{...d,row:parseInt(row)}:d, r=>{
+    if(r.ok){
+      cm('mA');
+      if(isE){
+        const idx=D.assets.findIndex(a=>a.row==row);
+        if(idx>=0)Object.assign(D.assets[idx],{cat:d.cat,model:d.model,brand:d.brand,serial:d.serial,status:d.status,loc:d.loc,pdate:d.pdate,warr:d.warr,obs:d.obs});
+      } else if(r.id){
+        D.assets.push({row:D.assets.length?Math.max(...D.assets.map(a=>a.row))+1:2,id:r.id,cat:d.cat,model:d.model,brand:d.brand,serial:d.serial,status:d.status||'Available',user:'N/A',loc:d.loc||'Portugal',pdate:d.pdate||'',warr:d.warr||'',obs:d.obs||''});
+        D.stats.total++;
+        if(d.status==='Available')D.stats.available++;
+      }
+      toast(isE?'Asset updated!':'Asset added! ID: '+(r.id||''),'ok');
+      render();scheduleSummaryRefresh();
+    } else{hd();se('aE',r.err||'Error')}
+  });
+}
+
+let summaryTimer=null;
+function scheduleSummaryRefresh(){
+  if(summaryTimer)clearTimeout(summaryTimer);
+  summaryTimer=setTimeout(()=>{api('refreshSummary',null).catch(()=>{});summaryTimer=null},5000);
+}
+
+function delA(row,model){
+  if(!confirm('Delete "'+model+'"?\nAssigned assets cannot be deleted.'))return;
+  ld('Deleting…');
+  run('deleteAsset',{row},r=>{
+    if(r.ok){
+      const idx=D.assets.findIndex(a=>a.row==row);
+      if(idx>=0){const removed=D.assets.splice(idx,1)[0];D.stats.total--;if((removed.status||'').toLowerCase()==='available')D.stats.available--}
+      toast('Deleted!','ok');render();saveCache(D);scheduleSummaryRefresh();
+    } else{hd();toast(r.err,'er')}
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   ASSIGN (BUG FIX: seleção persistente entre pesquisas)
+   ══════════════════════════════════════════════════════ */
+let availPool=[];
+let selectedAssignRows=new Set();
+
+function openAssign(pre){
+  he('gE');$('gR').classList.remove('on');$('gn').value='';$('gb').value='';$('gd').value=today();
+  $('gFs').value='';$('gFc').value='';
+  selectedAssignRows=new Set();
+
+  const sel=$('ge');sel.innerHTML='<option value="">Select…</option>';
+  (D?.employees||[]).forEach(x=>{const o=document.createElement('option');o.value=x.name;o.textContent=x.name;sel.appendChild(o)});
+  if(pre)sel.value=pre;
+
+  availPool=D?D.assets.filter(a=>{const u=(a.user||'').trim();const st=(a.status||'').toLowerCase();return(!u||u==='N/A'||u==='?'||u==='')&&st!=='in use'&&!st.includes('maintenance');}):[];
+
+  const catSel=$('gFc');catSel.innerHTML='<option value="">All categories</option>';
+  [...new Set(availPool.map(a=>a.cat).filter(Boolean))].sort().forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;catSel.appendChild(o)});
+
+  renderAvailAssets();om('mG');
+}
+
+function renderAvailAssets(){
+  const q=$('gFs').value.toLowerCase().trim();
+  const cat=$('gFc').value;
+  let list=availPool;
+  if(cat)list=list.filter(a=>a.cat===cat);
+  if(q)list=list.filter(a=>[a.id,a.cat,a.model,a.brand,a.serial,a.loc,a.obs].some(v=>String(v||'').toLowerCase().includes(q)));
+
+  if(!list.length){
+    $('gP').innerHTML='<div style="padding:14px;text-align:center;color:var(--t2)">No matching assets.</div>';
+  } else {
+    $('gP').innerHTML=list.map(a=>{
+      const isChecked=selectedAssignRows.has(String(a.row));
+      return `<div class="ai${isChecked?' sl':''}" onclick="tg(this,${a.row})">
+        <input type="checkbox" id="gc${a.row}" data-row="${a.row}"${isChecked?' checked':''} onclick="event.stopPropagation();tgChk(${a.row},this)">
+        <div style="flex:1;min-width:0">
+          <div style="font-family:var(--mn);font-size:10px;color:var(--acc)">${e(a.id)} · ${e(a.cat)}</div>
+          <div style="font-size:11px">${e(a.brand?a.brand+' ':'')}${e(a.model)}</div>
+          <div style="font-size:9px;color:var(--t2)">${e(a.serial||'No S/N')}${a.obs?' · '+e(a.obs):''}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  updGCnt();
+}
+
+function tg(el,row){const c=$('gc'+row);c.checked=!c.checked;if(c.checked)selectedAssignRows.add(String(row));else selectedAssignRows.delete(String(row));el.classList.toggle('sl',c.checked);updGCnt()}
+function tgChk(row,cb){if(cb.checked)selectedAssignRows.add(String(row));else selectedAssignRows.delete(String(row));const el=cb.closest('.ai');if(el)el.classList.toggle('sl',cb.checked);updGCnt()}
+function updGCnt(){$('gCnt').textContent=selectedAssignRows.size+' selected'}
+
+function subAssign(){
+  const emp=$('ge').value;
+  if(!emp){se('gE','Select an employee.');return}
+  const rows=[...selectedAssignRows].map(r=>parseInt(r));
+  if(!rows.length){se('gE','Select at least one asset.');return}
+  const assignBy=$('gb').value.trim()||'IT Admin';
+  const dateIssued=$('gd').value;
+  const notes=$('gn').value.trim();
+  cm('mG');
+  bgStart('assign-'+Date.now(),{title:`Assigning ${rows.length} item${rows.length>1?'s':''} to ${emp}`,step:1,totalSteps:2,stepText:'Updating spreadsheet…'});
+  run('assign',{emp,rows,date:dateIssued,by:assignBy,notes},r=>{
+    if(!r.ok){bgFinish('assign-error',false,'Failed: '+(r.err||'Error'));return}
+    rows.forEach(rowIdx=>{const a=D.assets.find(x=>x.row===rowIdx);if(a){a.user=emp;a.status='In use'}});
+    const empObj=D.employees.find(x=>x.name===emp);if(empObj)empObj.assetCount=(empObj.assetCount||0)+rows.length;
+    D.stats.assigned+=rows.length;D.stats.available-=rows.length;
+    (r.assetInfos||[]).forEach(a=>{D.movements.unshift({'Form No':r.formNo,'Date':r.date,'Action Type':'ASSIGN','Employee Name':emp,'Internal ID':a.id,'Asset Model':a.model,'Category':a.cat,'Serial Number':a.serial,'Performed By':assignBy,'Notes':notes})});
+    render();saveCache(D);
+    bgFinish('assign-done',true,`Assigned! Form #${r.formNo} being generated in background.`);
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   RETURN (BUG FIX: seleção persistente entre pesquisas)
+   ══════════════════════════════════════════════════════ */
+let retPool=[];
+let selectedReturnRows=new Set();
+
+function openReturn(name){
+  $('re').value=name;$('rd').value=today();$('rb').value='';$('rr').value='';$('rn').value='';
+  $('rFs').value='';
+  selectedReturnRows=new Set();
+  he('rE');$('rR').classList.remove('on');
+  retPool=D?D.assets.filter(a=>(a.user||'').toLowerCase()===name.toLowerCase()):[];
+  renderRetAssets();om('mR');
+}
+
+function renderRetAssets(){
+  const q=$('rFs').value.toLowerCase().trim();
+  let list=retPool;
+  if(q)list=list.filter(a=>[a.id,a.cat,a.model,a.brand,a.serial].some(v=>String(v||'').toLowerCase().includes(q)));
+
+  if(!list.length){
+    $('rP').innerHTML='<div style="padding:14px;text-align:center;color:var(--t2)">No matching assets.</div>';
+  } else {
+    $('rP').innerHTML=list.map(a=>{
+      const isChecked=selectedReturnRows.has(String(a.row));
+      return `<div class="ai${isChecked?' sl':''}" onclick="tr(this,${a.row})">
+        <input type="checkbox" id="rc${a.row}" data-row="${a.row}"${isChecked?' checked':''} onclick="event.stopPropagation();trChk(${a.row},this)">
+        <div style="flex:1;min-width:0">
+          <div style="font-family:var(--mn);font-size:10px;color:var(--acc)">${e(a.id)} · ${e(a.cat)}</div>
+          <div style="font-size:11px">${e(a.brand?a.brand+' ':'')}${e(a.model)}</div>
+          <div style="font-size:9px;color:var(--t2)">${e(a.serial||'No S/N')}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  updRCnt();
+}
+
+function tr(el,row){const c=$('rc'+row);c.checked=!c.checked;if(c.checked)selectedReturnRows.add(String(row));else selectedReturnRows.delete(String(row));el.classList.toggle('sl',c.checked);updRCnt()}
+function trChk(row,cb){if(cb.checked)selectedReturnRows.add(String(row));else selectedReturnRows.delete(String(row));const el=cb.closest('.ai');if(el)el.classList.toggle('sl',cb.checked);updRCnt()}
+function updRCnt(){$('rCnt').textContent=selectedReturnRows.size+' selected'}
+
+function subRet(){
+  const emp=$('re').value;
+  const rows=[...selectedReturnRows].map(r=>parseInt(r));
+  if(!rows.length){se('rE','Select at least one asset.');return}
+  const retBy=$('rb').value.trim()||'IT Admin';
+  const retDate=$('rd').value;
+  const reason=$('rr').value.trim();
+  const notes=$('rn').value.trim();
+  cm('mR');
+  bgStart('return-'+Date.now(),{title:`Returning ${rows.length} item${rows.length>1?'s':''} from ${emp}`,step:1,totalSteps:2,stepText:'Updating spreadsheet…'});
+  run('return',{emp,rows,date:retDate,by:retBy,reason,notes},r=>{
+    if(!r.ok){bgFinish('return-error',false,'Failed: '+(r.err||'Error'));return}
+    rows.forEach(rowIdx=>{const a=D.assets.find(x=>x.row===rowIdx);if(a){a.user='N/A';a.status='Available'}});
+    const empObj=D.employees.find(x=>x.name===emp);if(empObj)empObj.assetCount=Math.max(0,(empObj.assetCount||0)-rows.length);
+    D.stats.assigned-=rows.length;D.stats.available+=rows.length;
+    (r.assetInfos||[]).forEach(a=>{D.movements.unshift({'Form No':r.formNo,'Date':r.date,'Action Type':'RETURN','Employee Name':emp,'Internal ID':a.id,'Asset Model':a.model,'Category':a.cat,'Serial Number':a.serial,'Performed By':retBy,'Notes':notes})});
+    render();saveCache(D);
+    bgFinish('return-done',true,`Returned! Form #${r.formNo} being generated in background.`);
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   FORMS
+   ══════════════════════════════════════════════════════ */
+function viewForms(name,fid){
+  $('fN').textContent=name;
+  $('fL').innerHTML='<div style="text-align:center;padding:16px;color:var(--t2)">Loading…</div>';
+  om('mF');
+  run('loadForms',{folderId:fid},files=>{
+    if(!files.length){$('fL').innerHTML='<div style="text-align:center;padding:16px;color:var(--t2)">No forms yet.</div>';return}
+    $('fL').innerHTML=files.map(f=>{
+      const isPDF=f.name.toLowerCase().endsWith('.pdf');
+      return `<div style="display:flex;align-items:center;justify-content:space-between;background:var(--s2);border-radius:8px;padding:9px 12px;margin-bottom:6px">
+      <div style="flex:1;min-width:0"><div style="font-family:var(--mn);font-size:11px">${isPDF?'📕':'📄'} ${e(f.name)}</div><div style="font-size:9px;color:var(--t2)">${e(f.date)}</div></div>
+      <div style="display:flex;gap:5px;flex-shrink:0">
+        <a href="${f.url}" target="_blank" class="b bh bs">Open →</a>
+        ${!isPDF?`<button class="b bw bs" onclick="convertPDF('${f.id}',this)">📕 PDF</button>`:''}
+      </div></div>`;
+    }).join('');
+  });
+}
+
+function convertPDF(fileId,btn){
+  btn.disabled=true;
+  btn.innerHTML='<div class="sp" style="width:9px;height:9px;border-width:2px;display:inline-block;vertical-align:middle"></div> Converting…';
+  api('convertPDF',{fileId})
+    .then(r=>{
+      btn.disabled=false;
+      if(r.ok){
+        btn.innerHTML='✅ Done';
+        toast('✅ PDF created: '+r.name,'ok');
+        window.open(r.url,'_blank');
+        setTimeout(()=>{const empName=$('fN').textContent;if(D&&empName){const emp=D.employees.find(x=>x.name===empName);if(emp)viewForms(emp.name,emp.folderId)}},1500);
+      } else{btn.innerHTML='📕 PDF';toast('Failed: '+(r.err||'Error'),'er')}
+    })
+    .catch(err=>{btn.disabled=false;btn.innerHTML='📕 PDF';toast('PDF error: '+err.message,'er')});
+}
+
+/* ══════════════════════════════════════════════════════
+   SEARCH
+   ══════════════════════════════════════════════════════ */
+function doSrch(){
+  const q=$('SQ').value.trim();if(!q)return;
+  ld('Searching…');
+  run('search',{query:q},r=>{
+    hd();let h='';
+    if(r.movements?.length){
+      h+=`<div class="cd"><div class="ch"><div class="ct">📋 Results (${r.movements.length})</div></div>
+      <table><thead><tr><th>Form #</th><th>Date</th><th>Action</th><th>Employee</th><th>ID</th><th>Model</th></tr></thead><tbody>
+      ${r.movements.map(m=>{const ac=sv(m['Action Type'])==='ASSIGN'?'bdg':'bdr';
+        return `<tr><td><span style="font-family:var(--mn);font-size:10px;color:var(--acc)">#${e(sv(m['Form No']))}</span></td>
+        <td style="font-size:10px">${e(sv(m['Date']))}</td><td><span class="bd ${ac}">${e(sv(m['Action Type']))}</span></td>
+        <td>${e(sv(m['Employee Name']))}</td><td style="font-family:var(--mn);font-size:9px">${e(sv(m['Internal ID']))}</td>
+        <td style="color:var(--t2)">${e(sv(m['Asset Model']))}</td></tr>`}).join('')}
+      </tbody></table></div>`;
+    }
+    if(!h)h='<div style="text-align:center;padding:36px;color:var(--t2)">No results for "'+e(q)+'"</div>';
+    $('SR').innerHTML=h;
+  });
+}
+
+/* Close modals on overlay click */
+document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',ev=>{if(ev.target===m)m.classList.remove('on')}));
+</script>
+</body>
+</html>
