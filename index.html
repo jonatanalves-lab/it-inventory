@@ -824,21 +824,52 @@ function subRet(){
 /* ══════════════════════════════════════════════════════
    FORMS
    ══════════════════════════════════════════════════════ */
+let _formFiles=[];let _formFid='';let eSignMap={};
+
 function viewForms(name,fid){
   $('fN').textContent=name;
   $('fL').innerHTML='<div style="text-align:center;padding:16px;color:var(--t2)">Loading…</div>';
+  _formFid=fid;
   om('mF');
   run('loadForms',{folderId:fid},files=>{
-    if(!files.length){$('fL').innerHTML='<div style="text-align:center;padding:16px;color:var(--t2)">No forms yet.</div>';return}
-    $('fL').innerHTML=files.map(f=>{
-      const isPDF=f.name.toLowerCase().endsWith('.pdf');
-      return `<div style="display:flex;align-items:center;justify-content:space-between;background:var(--s2);border-radius:8px;padding:9px 12px;margin-bottom:6px">
-      <div style="flex:1;min-width:0"><div style="font-family:var(--mn);font-size:11px">${isPDF?'📕':'📄'} ${e(f.name)}</div><div style="font-size:9px;color:var(--t2)">${e(f.date)}</div></div>
-      <div style="display:flex;gap:5px;flex-shrink:0">
-        <a href="${f.url}" target="_blank" class="b bh bs">Open →</a>
-        ${!isPDF?`<button class="b bw bs" onclick="convertPDF('${f.id}',this)">📕 PDF</button>`:''}
-      </div></div>`;
-    }).join('');
+    _formFiles=files||[];
+    renderFormsList();
+  });
+}
+
+function renderFormsList(){
+  if(!_formFiles.length){$('fL').innerHTML='<div style="text-align:center;padding:16px;color:var(--t2)">No forms yet.</div>';return}
+  const refreshBtn=`<div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+    <button class="b bh bs" id="eSignBtn" onclick="refreshESign(this)">🔏 Check Signatures</button>
+  </div>`;
+  $('fL').innerHTML=refreshBtn+_formFiles.map(f=>{
+    const isPDF=f.name.toLowerCase().endsWith('.pdf');
+    const sig=eSignMap[f.id];
+    const badge=sig==='pending'
+      ?`<span style="font-size:9px;background:rgba(249,202,36,.15);color:#f9ca24;border:1px solid rgba(249,202,36,.3);border-radius:4px;padding:1px 6px;margin-left:6px">🔏 Pending</span>`
+      :sig==='signed'
+        ?`<span style="font-size:9px;background:rgba(67,233,123,.1);color:#43e97b;border:1px solid rgba(67,233,123,.2);border-radius:4px;padding:1px 6px;margin-left:6px">✅ Signed</span>`
+        :'';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;background:var(--s2);border-radius:8px;padding:9px 12px;margin-bottom:6px">
+    <div style="flex:1;min-width:0"><div style="font-family:var(--mn);font-size:11px">${isPDF?'📕':'📄'} ${e(f.name)}${badge}</div><div style="font-size:9px;color:var(--t2)">${e(f.date)}</div></div>
+    <div style="display:flex;gap:5px;flex-shrink:0">
+      <a href="${f.url}" target="_blank" class="b bh bs">Open →</a>
+      ${!isPDF?`<button class="b bw bs" onclick="convertPDF('${f.id}',this)">📕 PDF</button>`:''}
+    </div></div>`;
+  }).join('');
+}
+
+function refreshESign(btn){
+  if(!_formFid)return;
+  btn.disabled=true;btn.textContent='Checking…';
+  run('eSignStatus',{folderId:_formFid},r=>{
+    btn.disabled=false;btn.textContent='🔏 Check Signatures';
+    if(r&&r.ok&&r.files){
+      r.files.forEach(f=>{eSignMap[f.id]=f.eSignStatus;});
+      renderFormsList();
+      const pending=r.files.filter(f=>f.eSignStatus==='pending').length;
+      toast(pending?`🔏 ${pending} signature(s) pending`:'✅ No pending signatures','ok');
+    } else{toast('Error checking signatures: '+(r&&r.err||'Unknown error'),'er')}
   });
 }
 
