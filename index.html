@@ -860,36 +860,42 @@ function renderSignaturesPage(){
   if(!D||!D.employees){$('T6').innerHTML='';return}
   const rows=D.employees.map(x=>{
     const files=sigData[x.folderId]||null;
-    let pending=0,signed=0,none=0,total=0;
+    let pending=[],signed=[];
     if(files){
       files.forEach(f=>{
-        total++;
-        if(f.eSignStatus==='pending')pending++;
-        else if(f.eSignStatus==='signed')signed++;
-        else none++;
+        if(f.status==='pending')pending.push(f);
+        else if(f.status==='signed')signed.push(f);
       });
     }
     const notChecked=files===null;
-    const pendingBadge=pending?`<span class="bd bdy">${pending}</span>`:`<span class="bd bdx">0</span>`;
-    const signedBadge=signed?`<span class="bd bdg">${signed}</span>`:`<span class="bd bdx">0</span>`;
-    const noneBadge=none?`<span class="bd bdx">${none}</span>`:`<span class="bd bdx">0</span>`;
-    const statusCell=notChecked
-      ?`<span style="font-size:9px;color:var(--t2)">Not checked yet</span>`
-      :`${pendingBadge} ${signedBadge} ${noneBadge}`;
+    const noESign=files!==null&&files.length===0;
     const viewBtn=x.folderId?`<button class="b bh bs" onclick="viewForms('${e(x.name)}','${e(x.folderId)}')">📄 View</button>`:'—';
     if(notChecked){
       return `<tr>
         <td><b>${e(x.name)}</b>${x.email?'<br><span style="font-size:9px;color:var(--t2)">'+e(x.email)+'</span>':''}</td>
         <td style="color:var(--t2)">${e(x.title||'—')}</td>
-        <td colspan="3" style="color:var(--t2);font-size:10px">— not checked yet —</td>
+        <td colspan="3" style="color:var(--t2);font-size:10px;padding:10px 16px">— not checked yet —</td>
         <td>${viewBtn}</td></tr>`;
     }
+    if(noESign){
+      return `<tr>
+        <td><b>${e(x.name)}</b>${x.email?'<br><span style="font-size:9px;color:var(--t2)">'+e(x.email)+'</span>':''}</td>
+        <td style="color:var(--t2)">${e(x.title||'—')}</td>
+        <td colspan="3" style="color:var(--t2);font-size:10px;padding:10px 16px">No eSignature requests found</td>
+        <td>${viewBtn}</td></tr>`;
+    }
+    const pendingCell=pending.length
+      ?`<div style="display:flex;flex-direction:column;gap:3px">${pending.map(f=>`<span class="bd bdy" style="font-size:9px">🔏 Pending${f.signee?' · <span style="opacity:.8">'+e(f.signee)+'</span>':''}</span>`).join('')}</div>`
+      :`<span class="bd bdx">—</span>`;
+    const signedCell=signed.length
+      ?`<span class="bd bdg">✅ ${signed.length} signed</span>`
+      :`<span class="bd bdx">—</span>`;
     return `<tr>
       <td><b>${e(x.name)}</b>${x.email?'<br><span style="font-size:9px;color:var(--t2)">'+e(x.email)+'</span>':''}</td>
       <td style="color:var(--t2)">${e(x.title||'—')}</td>
-      <td>${pending?`<span class="bd bdy">🔏 ${pending} pending</span>`:`<span class="bd bdx">—</span>`}</td>
-      <td>${signed?`<span class="bd bdg">✅ ${signed} signed</span>`:`<span class="bd bdx">—</span>`}</td>
-      <td>${none?`<span class="bd bdx">${none}</span>`:`<span class="bd bdx">—</span>`}</td>
+      <td>${pendingCell}</td>
+      <td>${signedCell}</td>
+      <td>—</td>
       <td>${viewBtn}</td></tr>`;
   }).join('');
   $('T6').innerHTML=rows||'<tr><td colspan="6" style="text-align:center;color:var(--t2)">No employees</td></tr>';
@@ -905,7 +911,9 @@ function refreshAllSig(btn){
   run('eSignStatusAll',{folderIds},r=>{
     btn.disabled=false;btn.textContent='🔄 Refresh All';
     if(r&&r.ok){
-      Object.keys(r.byFolder).forEach(fid=>{sigData[fid]=r.byFolder[fid];});
+      Object.keys(r.byFolder).forEach(fid=>{
+        sigData[fid]=(r.byFolder[fid]||[]).map(f=>({id:f.id,name:f.name,status:f.eSignStatus,signee:f.signee||''}));
+      });
       const now=new Date().toLocaleTimeString();
       $('sigLastUpdate').textContent='Last update: '+now;
       renderSignaturesPage();
@@ -923,9 +931,9 @@ function renderFormsList(){
   $('fL').innerHTML=refreshBtn+_formFiles.map(f=>{
     const isPDF=f.name.toLowerCase().endsWith('.pdf');
     const sig=eSignMap[f.id];
-    const badge=sig==='pending'
-      ?`<span style="font-size:9px;background:rgba(249,202,36,.15);color:#f9ca24;border:1px solid rgba(249,202,36,.3);border-radius:4px;padding:1px 6px;margin-left:6px">🔏 Pending</span>`
-      :sig==='signed'
+    const badge=sig&&sig.status==='pending'
+      ?`<span style="font-size:9px;background:rgba(249,202,36,.15);color:#f9ca24;border:1px solid rgba(249,202,36,.3);border-radius:4px;padding:1px 6px;margin-left:6px">🔏 Pending${sig.signee?' · '+e(sig.signee):''}</span>`
+      :sig&&sig.status==='signed'
         ?`<span style="font-size:9px;background:rgba(67,233,123,.1);color:#43e97b;border:1px solid rgba(67,233,123,.2);border-radius:4px;padding:1px 6px;margin-left:6px">✅ Signed</span>`
         :'';
     return `<div style="display:flex;align-items:center;justify-content:space-between;background:var(--s2);border-radius:8px;padding:9px 12px;margin-bottom:6px">
@@ -943,7 +951,7 @@ function refreshESign(btn){
   run('eSignStatus',{folderId:_formFid},r=>{
     btn.disabled=false;btn.textContent='🔏 Check Signatures';
     if(r&&r.ok&&r.files){
-      r.files.forEach(f=>{eSignMap[f.id]=f.eSignStatus;});
+      r.files.forEach(f=>{eSignMap[f.id]={status:f.eSignStatus,signee:f.signee||''};});
       renderFormsList();
       const pending=r.files.filter(f=>f.eSignStatus==='pending').length;
       toast(pending?`🔏 ${pending} signature(s) pending`:'✅ No pending signatures','ok');
