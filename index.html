@@ -105,8 +105,7 @@ a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
     <div class="ni" onclick="nav('ast')" data-p="ast"><span>💻</span>Assets</div>
     <div class="ni" onclick="nav('mov')" data-p="mov"><span>📋</span>Movements</div>
     <div class="ni" onclick="nav('srch')" data-p="srch"><span>🔍</span>Search</div>
-    <div class="ni" onclick="nav('sig')" data-p="sig"><span>🔏</span>Signatures</div>
-    <div class="sbt"><div class="ni" onclick="logout()" style="color:var(--r)"><span>🚪</span>Logout</div></div>
+<div class="sbt"><div class="ni" onclick="logout()" style="color:var(--r)"><span>🚪</span>Logout</div></div>
   </nav>
 
   <main class="mn">
@@ -154,18 +153,6 @@ a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
       <div class="tb"><h1 class="pt">📋 <span>Movements</span></h1></div>
       <div class="cd"><table><thead><tr><th>Form #</th><th>Date</th><th>Action</th><th>Employee</th><th>ID</th><th>Model</th><th>Category</th><th>Serial</th><th>By</th></tr></thead>
       <tbody id="T5"></tbody></table></div>
-    </div>
-
-    <!-- SIGNATURES -->
-    <div class="pg" id="pg-sig">
-      <div class="tb"><h1 class="pt">🔏 <span>Signatures</span></h1>
-        <button class="b bp" onclick="refreshAllSig(this)">🔄 Refresh All</button>
-      </div>
-      <div class="cd">
-        <div class="ch"><div class="ct">eSignature Status — All Employees</div><div id="sigLastUpdate" style="font-size:9px;color:var(--t2);font-family:var(--mn)"></div></div>
-        <table><thead><tr><th>Employee</th><th>Title</th><th>Pending</th><th>Signed</th><th>No Request</th><th>Forms</th></tr></thead>
-        <tbody id="T6"></tbody></table>
-      </div>
     </div>
 
     <!-- SEARCH -->
@@ -441,7 +428,6 @@ function renderCurrentPage(){
   else if(currentPage==='emp')  renderEmployeesPage();
   else if(currentPage==='ast')  renderAssetsPage();
   else if(currentPage==='mov')  renderMovementsPage();
-  else if(currentPage==='sig')  renderSignaturesPage();
 }
 
 function renderDashboardPage(){
@@ -838,124 +824,21 @@ function subRet(){
 /* ══════════════════════════════════════════════════════
    FORMS
    ══════════════════════════════════════════════════════ */
-let _formFiles=[];let _formFid='';let eSignMap={};
-
 function viewForms(name,fid){
   $('fN').textContent=name;
   $('fL').innerHTML='<div style="text-align:center;padding:16px;color:var(--t2)">Loading…</div>';
-  _formFid=fid;
   om('mF');
   run('loadForms',{folderId:fid},files=>{
-    _formFiles=files||[];
-    renderFormsList();
-  });
-}
-
-/* ══════════════════════════════════════════════════════
-   SIGNATURES PAGE
-   ══════════════════════════════════════════════════════ */
-let sigData={};// {folderId: [{id,name,eSignStatus}]}
-
-function renderSignaturesPage(){
-  if(!D||!D.employees){$('T6').innerHTML='';return}
-  const rows=D.employees.map(x=>{
-    const files=sigData[x.folderId]||null;
-    let pending=[],signed=[];
-    if(files){
-      files.forEach(f=>{
-        if(f.status==='pending')pending.push(f);
-        else if(f.status==='signed')signed.push(f);
-      });
-    }
-    const notChecked=files===null;
-    const noESign=files!==null&&files.length===0;
-    const viewBtn=x.folderId?`<button class="b bh bs" onclick="viewForms('${e(x.name)}','${e(x.folderId)}')">📄 View</button>`:'—';
-    if(notChecked){
-      return `<tr>
-        <td><b>${e(x.name)}</b>${x.email?'<br><span style="font-size:9px;color:var(--t2)">'+e(x.email)+'</span>':''}</td>
-        <td style="color:var(--t2)">${e(x.title||'—')}</td>
-        <td colspan="3" style="color:var(--t2);font-size:10px;padding:10px 16px">— not checked yet —</td>
-        <td>${viewBtn}</td></tr>`;
-    }
-    if(noESign){
-      return `<tr>
-        <td><b>${e(x.name)}</b>${x.email?'<br><span style="font-size:9px;color:var(--t2)">'+e(x.email)+'</span>':''}</td>
-        <td style="color:var(--t2)">${e(x.title||'—')}</td>
-        <td colspan="3" style="color:var(--t2);font-size:10px;padding:10px 16px">No eSignature requests found</td>
-        <td>${viewBtn}</td></tr>`;
-    }
-    const pendingCell=pending.length
-      ?`<div style="display:flex;flex-direction:column;gap:3px">${pending.map(f=>`<span class="bd bdy" style="font-size:9px">🔏 Pending${f.signee?' · <span style="opacity:.8">'+e(f.signee)+'</span>':''}</span>`).join('')}</div>`
-      :`<span class="bd bdx">—</span>`;
-    const signedCell=signed.length
-      ?`<span class="bd bdg">✅ ${signed.length} signed</span>`
-      :`<span class="bd bdx">—</span>`;
-    return `<tr>
-      <td><b>${e(x.name)}</b>${x.email?'<br><span style="font-size:9px;color:var(--t2)">'+e(x.email)+'</span>':''}</td>
-      <td style="color:var(--t2)">${e(x.title||'—')}</td>
-      <td>${pendingCell}</td>
-      <td>${signedCell}</td>
-      <td>—</td>
-      <td>${viewBtn}</td></tr>`;
-  }).join('');
-  $('T6').innerHTML=rows||'<tr><td colspan="6" style="text-align:center;color:var(--t2)">No employees</td></tr>';
-}
-
-function refreshAllSig(btn){
-  if(!D||!D.employees)return;
-  const empsWithFolder=D.employees.filter(x=>x.folderId);
-  if(!empsWithFolder.length){toast('No employees with folders','er');return}
-  btn.disabled=true;btn.textContent='Checking…';
-  const folderMap=Object.fromEntries(empsWithFolder.map(x=>[x.folderId,x.name]));
-  const folderIds=empsWithFolder.map(x=>x.folderId);
-  run('eSignStatusAll',{folderIds},r=>{
-    btn.disabled=false;btn.textContent='🔄 Refresh All';
-    if(r&&r.ok){
-      Object.keys(r.byFolder).forEach(fid=>{
-        sigData[fid]=(r.byFolder[fid]||[]).map(f=>({id:f.id,name:f.name,status:f.eSignStatus,signee:f.signee||''}));
-      });
-      const now=new Date().toLocaleTimeString();
-      $('sigLastUpdate').textContent='Last update: '+now;
-      renderSignaturesPage();
-      const totalPending=Object.values(r.byFolder).flat().filter(f=>f.eSignStatus==='pending').length;
-      toast(totalPending?`🔏 ${totalPending} signature(s) pending across all employees`:'✅ No pending signatures','ok');
-    } else{toast('Error: '+(r&&r.err||'Unknown'),'er')}
-  });
-}
-
-function renderFormsList(){
-  if(!_formFiles.length){$('fL').innerHTML='<div style="text-align:center;padding:16px;color:var(--t2)">No forms yet.</div>';return}
-  const refreshBtn=`<div style="display:flex;justify-content:flex-end;margin-bottom:8px">
-    <button class="b bh bs" id="eSignBtn" onclick="refreshESign(this)">🔏 Check Signatures</button>
-  </div>`;
-  $('fL').innerHTML=refreshBtn+_formFiles.map(f=>{
-    const isPDF=f.name.toLowerCase().endsWith('.pdf');
-    const sig=eSignMap[f.id];
-    const badge=sig&&sig.status==='pending'
-      ?`<span style="font-size:9px;background:rgba(249,202,36,.15);color:#f9ca24;border:1px solid rgba(249,202,36,.3);border-radius:4px;padding:1px 6px;margin-left:6px">🔏 Pending${sig.signee?' · '+e(sig.signee):''}</span>`
-      :sig&&sig.status==='signed'
-        ?`<span style="font-size:9px;background:rgba(67,233,123,.1);color:#43e97b;border:1px solid rgba(67,233,123,.2);border-radius:4px;padding:1px 6px;margin-left:6px">✅ Signed</span>`
-        :'';
-    return `<div style="display:flex;align-items:center;justify-content:space-between;background:var(--s2);border-radius:8px;padding:9px 12px;margin-bottom:6px">
-    <div style="flex:1;min-width:0"><div style="font-family:var(--mn);font-size:11px">${isPDF?'📕':'📄'} ${e(f.name)}${badge}</div><div style="font-size:9px;color:var(--t2)">${e(f.date)}</div></div>
-    <div style="display:flex;gap:5px;flex-shrink:0">
-      <a href="${f.url}" target="_blank" class="b bh bs">Open →</a>
-      ${!isPDF?`<button class="b bw bs" onclick="convertPDF('${f.id}',this)">📕 PDF</button>`:''}
-    </div></div>`;
-  }).join('');
-}
-
-function refreshESign(btn){
-  if(!_formFid)return;
-  btn.disabled=true;btn.textContent='Checking…';
-  run('eSignStatus',{folderId:_formFid},r=>{
-    btn.disabled=false;btn.textContent='🔏 Check Signatures';
-    if(r&&r.ok&&r.files){
-      r.files.forEach(f=>{eSignMap[f.id]={status:f.eSignStatus,signee:f.signee||''};});
-      renderFormsList();
-      const pending=r.files.filter(f=>f.eSignStatus==='pending').length;
-      toast(pending?`🔏 ${pending} signature(s) pending`:'✅ No pending signatures','ok');
-    } else{toast('Error checking signatures: '+(r&&r.err||'Unknown error'),'er')}
+    if(!files||!files.length){$('fL').innerHTML='<div style="text-align:center;padding:16px;color:var(--t2)">No forms yet.</div>';return}
+    $('fL').innerHTML=files.map(f=>{
+      const isPDF=f.name.toLowerCase().endsWith('.pdf');
+      return `<div style="display:flex;align-items:center;justify-content:space-between;background:var(--s2);border-radius:8px;padding:9px 12px;margin-bottom:6px">
+      <div style="flex:1;min-width:0"><div style="font-family:var(--mn);font-size:11px">${isPDF?'📕':'📄'} ${e(f.name)}</div><div style="font-size:9px;color:var(--t2)">${e(f.date)}</div></div>
+      <div style="display:flex;gap:5px;flex-shrink:0">
+        <a href="${f.url}" target="_blank" class="b bh bs">Open →</a>
+        ${!isPDF?`<button class="b bw bs" onclick="convertPDF('${f.id}',this)">📕 PDF</button>`:''}
+      </div></div>`;
+    }).join('');
   });
 }
 
